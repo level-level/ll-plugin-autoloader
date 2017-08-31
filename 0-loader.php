@@ -3,7 +3,7 @@
  * Plugin Name: Bedrock Autoloader
  * Plugin URI: https://github.com/roots/bedrock/
  * Description: An autoloader that enables standard plugins to be required just like must-use plugins. The autoloaded plugins are included during mu-plugin loading. An asterisk (*) next to the name of the plugin designates the plugins that have been autoloaded.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Roots
  * Author URI: https://roots.io/
  * License: MIT License
@@ -11,10 +11,20 @@
 
 namespace Roots\Bedrock;
 
-$themeDir = get_template_directory();
-$autoloadFile = $themeDir . '/vendor/autoload.php';
+if(!defined('LL_AUTOLOAD_DIR')){
+    if(!defined('LL_AUTOLOAD_USE_CHILD') || constant('LL_AUTOLOAD_USE_CHILD') == false){
+        define('LL_AUTOLOAD_DIR', get_template_directory());
+    }else{
+        define('LL_AUTOLOAD_DIR', get_stylesheet_directory());
+    }
+}
+
+$autoloadFile = constant('LL_AUTOLOAD_DIR') . '/vendor/autoload.php';
+
 if(file_exists($autoloadFile)){
   require_once($autoloadFile);
+}else{
+    trigger_error(sprintf('No vendor autoload file was found @ %s', $autoloadFile));
 }
 
 if (!is_blog_installed()) {
