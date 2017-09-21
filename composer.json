@@ -1,6 +1,6 @@
 {
-  "name": "ll-custom/ll-plugin-autoloader",
   "type": "wp-ll-plugin",
+  "name": "level-level/ll-plugin-autoloader",
   "require": {}
 }
 
