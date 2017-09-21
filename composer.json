@@ -1,5 +1,4 @@
 {
   "name": "level-level/ll-plugin-autoloader",
-  "type": "wp-ll-plugin",
   "require": {}
 }
