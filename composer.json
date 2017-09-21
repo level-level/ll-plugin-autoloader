@@ -1,6 +1,6 @@
 {
   "name": "level-level/ll-plugin-autoloader",
-  "type": "wordpress-muplugin",
+  "type": "wp-ll-plugin",
   "require": {}
 }
 
