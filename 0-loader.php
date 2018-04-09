@@ -21,8 +21,15 @@ if(!defined('LL_AUTOLOAD_DIR')){
 
 $autoloadFile = constant('LL_AUTOLOAD_DIR') . '/vendor/autoload.php';
 
+if(file_exists(constant('LL_AUTOLOAD_DIR') . '/pre-autoload.php')){
+    require_once(constant('LL_AUTOLOAD_DIR') . '/pre-autoload.php');
+}
+
 if(file_exists($autoloadFile)){
-  require_once($autoloadFile);
+    require_once($autoloadFile);
+    if(file_exists(constant('LL_AUTOLOAD_DIR') . '/post-autoload.php')){
+        require_once(constant('LL_AUTOLOAD_DIR') . '/post-autoload.php');
+    }
 }else{
     trigger_error(sprintf('No vendor autoload file was found @ %s', $autoloadFile));
 }
@@ -212,4 +219,3 @@ class Autoloader
 }
 
 new Autoloader();
-
