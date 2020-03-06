@@ -12,7 +12,7 @@
 namespace Roots\Bedrock;
 
 if(!defined('LL_AUTOLOAD_DIR')){
-    if(!defined('LL_AUTOLOAD_CONTENT_DIR') || constant('LL_AUTOLOAD_CONTENT_DIR') === true){
+    if(defined('LL_AUTOLOAD_CONTENT_DIR') && constant('LL_AUTOLOAD_CONTENT_DIR') === true){
         define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
     }else{
         if(!defined('LL_AUTOLOAD_USE_CHILD') || constant('LL_AUTOLOAD_USE_CHILD') == false){
