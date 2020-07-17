@@ -31,6 +31,15 @@ Use a specific directory. The script will still append `/vendor/autoload.php` to
 define('LL_AUTOLOAD_DIR', '/path/to/wordpress/theme/');
 ```
 
+### Overview
+
+| **Setting**                                  | **Result**                         |
+|----------------------------------------------|------------------------------------|
+| Nothing                                      | Template directory (parent theme)  |
+| `define( 'LL_AUTOLOAD_DIR', '/tmp/' );`      | `/tmp/`                            |
+| `define( 'LL_AUTOLOAD_CONTENT_DIR', true );` | wp-content directory               |
+| `define( 'LL_AUTOLOAD_USE_CHILD', true )`    | Stylesheet directory (child theme) |
+
 ## Pre and Post autoload
 
 ### Pre autoload
