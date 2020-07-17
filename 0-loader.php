@@ -37,19 +37,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $autoload_dir = determine_autoload_dir();
 
-$autoloadFile =  $autoload_dir . '/vendor/autoload.php';
+$autoload_file =  $autoload_dir . '/vendor/autoload.php';
 
 if(file_exists( $autoload_dir . '/pre-autoload.php')){
     require_once( $autoload_dir . '/pre-autoload.php');
 }
 
-if(file_exists($autoloadFile)){
-    require_once($autoloadFile);
+if(file_exists($autoload_file)){
+    require_once($autoload_file);
     if(file_exists( $autoload_dir . '/post-autoload.php')){
         require_once( $autoload_dir . '/post-autoload.php');
     }
 }else{
-    trigger_error(sprintf('No vendor autoload file was found @ %s', $autoloadFile));
+    trigger_error(sprintf('No vendor autoload file was found @ %s', $autoload_file));
 }
 
 
