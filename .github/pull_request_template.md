@@ -1,7 +1,7 @@
 <!--- Provide a general summary of your changes in the Title above -->
 
 ## Issue link
-<!--- Link to the origin of the issue in Asana or HelpScout. --> 
+<!--- Link to the origin of the issue in GitHub issues or otherwise. --> 
 
 ## Description
 <!--- Describe your changes in detail -->
