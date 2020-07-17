@@ -12,17 +12,21 @@
 namespace Roots\Bedrock;
 
 function determine_autoload_dir(){
-    if(!defined('LL_AUTOLOAD_DIR')){
-        if(defined('LL_AUTOLOAD_CONTENT_DIR') && constant('LL_AUTOLOAD_CONTENT_DIR') === true){
-            define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
-        }else{
-            if(!defined('LL_AUTOLOAD_USE_CHILD') || constant('LL_AUTOLOAD_USE_CHILD') == false){
-                define('LL_AUTOLOAD_DIR', get_template_directory());
-            }else{
-                define('LL_AUTOLOAD_DIR', get_stylesheet_directory());
-            }
-        }
+    if(defined('LL_AUTOLOAD_DIR')){
+        return constant('LL_AUTOLOAD_DIR');
     }
+
+    if(defined('LL_AUTOLOAD_CONTENT_DIR') && constant('LL_AUTOLOAD_CONTENT_DIR') === true){
+        define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
+        return constant('LL_AUTOLOAD_DIR');
+    }
+
+    if(defined('LL_AUTOLOAD_USE_CHILD') && constant('LL_AUTOLOAD_USE_CHILD') === true){
+        define('LL_AUTOLOAD_DIR', get_stylesheet_directory());
+        return constant('LL_AUTOLOAD_DIR');
+    }
+    
+    define('LL_AUTOLOAD_DIR', get_template_directory());
     return constant('LL_AUTOLOAD_DIR');
 }
 
