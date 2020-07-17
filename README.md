@@ -39,3 +39,17 @@ define('LL_AUTOLOAD_DIR', '/path/to/wordpress/theme/');
 | `define( 'LL_AUTOLOAD_DIR', '/tmp/' );`      | `/tmp/`                            |
 | `define( 'LL_AUTOLOAD_CONTENT_DIR', true );` | wp-content directory               |
 | `define( 'LL_AUTOLOAD_USE_CHILD', true )`    | Stylesheet directory (child theme) |
+
+## Pre and Post autoload
+
+### Pre autoload
+Right before the vendor autoload file is loaded, the `pre-autoload.php` file in the directory specified as the autoload directory is required if it exists. 
+
+This file can be used to set enviroment variables required in composer loaded dependencies.
+
+### Post autoload
+Right after the vendor autoload file is loaded, but before the `mu-plugins` are loaded, the `post-autoload.php` file in the directory specified as the autoload directory is required if it exists.
+
+This file can be used to bootstrap/configure mu-plugin loaded dependencies, or trigger actions that need to happen as early as possible, but autoloading to be set up. 
+
+Adding logging is an example of this. You probably require the Monolog composer dependency, but want it to be bootstrapped before we load the mu-plugins.
