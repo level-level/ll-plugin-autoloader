@@ -45,7 +45,7 @@ define('LL_AUTOLOAD_DIR', '/path/to/wordpress/theme/');
 ### Pre autoload
 Right before the vendor autoload file is loaded, the `pre-autoload.php` file in the directory specified as the autoload directory is required if it exists. 
 
-This file can be used to set enviroment variables required in composer loaded dependencies.
+This file can be used to set environment variables required in composer loaded dependencies.
 
 ### Post autoload
 Right after the vendor autoload file is loaded, but before the `mu-plugins` are loaded, the `post-autoload.php` file in the directory specified as the autoload directory is required if it exists.
