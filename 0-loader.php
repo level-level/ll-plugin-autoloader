@@ -26,7 +26,12 @@ function determine_autoload_dir(){
         return constant('LL_AUTOLOAD_DIR');
     }
     
-    define('LL_AUTOLOAD_DIR', get_template_directory());
+    if(defined('LL_AUTOLOAD_USE_PARENT') && constant('LL_AUTOLOAD_USE_PARENT') === true){
+        define('LL_AUTOLOAD_DIR', get_template_directory());
+        return constant('LL_AUTOLOAD_DIR');
+    }
+
+    define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
     return constant('LL_AUTOLOAD_DIR');
 }
 
