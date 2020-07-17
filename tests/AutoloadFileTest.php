@@ -15,13 +15,19 @@ class AutoloadFileTest extends TestCase{
         return array(
             'No definitions set' => array(
                 array(),
-                './template_directory/',
+                realpath( __DIR__ . '/../../' ), // The parent of the 0-loader is two directories up from this file.
             ),
             'Autoload dir predefined' => array(
                 array(
                     'LL_AUTOLOAD_DIR' => '/tmp/'
                 ),
                 '/tmp/',
+            ),
+            'Use parent theme (template directory) autoload' => array(
+                array(
+                    'LL_AUTOLOAD_USE_PARENT' => true,
+                ),
+                './template_directory/',
             ),
             'Use child theme autoload directory' => array(
                 array(
