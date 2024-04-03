@@ -1,66 +1,16 @@
 <?php
+
 /**
- * Plugin Name: Bedrock Autoloader (Customized by Level Level)
+ * Plugin Name: Level Level autoloader, based on Bedrock Autoloader 1.0.4
  * Plugin URI: https://github.com/roots/bedrock/
- * Description: An autoloader that enables standard plugins to be required just like must-use plugins. The autoloaded plugins are included during mu-plugin loading. An asterisk (*) next to the name of the plugin designates the plugins that have been autoloaded.
- * Version: 1.1.0
+ * Description: Bedrock Autoloader enables standard plugins to be required just like must-use plugins. The autoloaded plugins are included after all mu-plugins and standard plugins have been loaded. An asterisk next to the name of the plugin designates the plugins that have been autoloaded.
+ * Version: 3.1.0
  * Author: Roots
  * Author URI: https://roots.io/
  * License: MIT License
  */
 
 namespace Roots\Bedrock;
-
-function determine_autoload_dir(){
-    if(defined('LL_AUTOLOAD_DIR')){
-        return constant('LL_AUTOLOAD_DIR');
-    }
-
-    if(defined('LL_AUTOLOAD_CONTENT_DIR') && constant('LL_AUTOLOAD_CONTENT_DIR') === true){
-        define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
-        return constant('LL_AUTOLOAD_DIR');
-    }
-
-    if(defined('LL_AUTOLOAD_USE_CHILD') && constant('LL_AUTOLOAD_USE_CHILD') === true){
-        define('LL_AUTOLOAD_DIR', get_stylesheet_directory());
-        return constant('LL_AUTOLOAD_DIR');
-    }
-    
-    if(defined('LL_AUTOLOAD_USE_PARENT') && constant('LL_AUTOLOAD_USE_PARENT') === true){
-        define('LL_AUTOLOAD_DIR', get_template_directory());
-        return constant('LL_AUTOLOAD_DIR');
-    }
-
-    define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
-    return constant('LL_AUTOLOAD_DIR');
-}
-
-
-if ( ! defined( 'ABSPATH' ) ) {
-    return;
-}
-
-$autoload_dir = determine_autoload_dir();
-
-$autoload_file =  $autoload_dir . '/vendor/autoload.php';
-
-if(file_exists( $autoload_dir . '/pre-autoload.php')){
-    require_once( $autoload_dir . '/pre-autoload.php');
-}
-
-if(file_exists($autoload_file)){
-    require_once($autoload_file);
-    if(file_exists( $autoload_dir . '/post-autoload.php')){
-        require_once( $autoload_dir . '/post-autoload.php');
-    }
-}else{
-    trigger_error(sprintf('No vendor autoload file was found @ %s', $autoload_file));
-}
-
-
-if (!is_blog_installed()) {
-    return;
-}
 
 /**
  * Class Autoloader
@@ -70,44 +20,98 @@ if (!is_blog_installed()) {
  */
 class Autoloader
 {
+    /** @var static Singleton instance */
+    private static $instance;
+
     /** @var array Store Autoloader cache and site option */
-    private static $cache;
+    private $cache;
 
     /** @var array Autoloaded plugins */
-    private static $auto_plugins;
+    private $autoPlugins;
 
     /** @var array Autoloaded mu-plugins */
-    private static $mu_plugins;
+    private $muPlugins;
 
     /** @var int Number of plugins */
-    private static $count;
+    private $count;
 
     /** @var array Newly activated plugins */
-    private static $activated;
+    private $activated;
 
     /** @var string Relative path to the mu-plugins dir */
-    private static $relative_path;
-
-    /** @var static Singleton instance */
-    private static $_single;
+    private $relativePath;
 
     /**
      * Create singleton, populate vars, and set WordPress hooks
      */
     public function __construct()
     {
-        if (isset(self::$_single)) {
+        if (isset(self::$instance)) {
             return;
         }
 
-        self::$_single = $this;
-        self::$relative_path = '/../' . basename(__DIR__);
+        self::$instance = $this;
+
+        $this->relativePath = '/../' . basename(WPMU_PLUGIN_DIR);
 
         if (is_admin()) {
             add_filter('show_advanced_plugins', [$this, 'showInAdmin'], 0, 2);
         }
 
+        $this->llAutoload(); // Call the custom autoloading for Level Level
         $this->loadPlugins();
+    }
+
+    /**
+     * Custom function by Level Level.
+     * This function returns the directory where the composer.json file is located.
+     */
+    private function llDetermineAutoloadeDir(): string {
+        if (defined('LL_AUTOLOAD_DIR')) {
+            return constant('LL_AUTOLOAD_DIR');
+        }
+    
+        if (defined('LL_AUTOLOAD_CONTENT_DIR') && constant('LL_AUTOLOAD_CONTENT_DIR') === true) {
+            define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
+            return constant('LL_AUTOLOAD_DIR');
+        }
+    
+        if (defined('LL_AUTOLOAD_USE_CHILD') && constant('LL_AUTOLOAD_USE_CHILD') === true) {
+            define('LL_AUTOLOAD_DIR', get_stylesheet_directory());
+            return constant('LL_AUTOLOAD_DIR');
+        }
+        
+        if (defined('LL_AUTOLOAD_USE_PARENT') && constant('LL_AUTOLOAD_USE_PARENT') === true) {
+            define('LL_AUTOLOAD_DIR', get_template_directory());
+            return constant('LL_AUTOLOAD_DIR');
+        }
+    
+        define('LL_AUTOLOAD_DIR', realpath(__DIR__.'/../'));
+        return constant('LL_AUTOLOAD_DIR');
+    }
+
+    /**
+     * Custom function by Level Level.
+     * This function loads the pre-autoload file.
+     * Then it loads the composer autoload file.
+     * Finally it loads the post-autoload file.
+     */
+    private function llAutoload(): void {
+        $autoload_dir = $this->llDetermineAutoloadeDir();
+        if (file_exists( $autoload_dir . '/pre-autoload.php')) {
+            require_once( $autoload_dir . '/pre-autoload.php');
+        }
+
+        $autoload_file = $autoload_dir . '/vendor/autoload.php';
+        if (file_exists($autoload_file)){
+            require_once($autoload_file);
+
+            if (file_exists( $autoload_dir . '/post-autoload.php')) {
+                require_once( $autoload_dir . '/post-autoload.php');
+            }
+        } else {
+            trigger_error(sprintf('No vendor autoload file was found @ %s', $autoload_file));
+        }
     }
 
    /**
@@ -120,15 +124,15 @@ class Autoloader
         $this->countPlugins();
 
         array_map(static function () {
-            include_once(WPMU_PLUGIN_DIR . '/' . func_get_args()[0]);
-        }, array_keys(self::$cache['plugins']));
+            include_once WPMU_PLUGIN_DIR . '/' . func_get_args()[0];
+        }, array_keys($this->cache['plugins']));
 
-        $this->pluginHooks();
+        add_action('plugins_loaded', [$this, 'pluginHooks'], -9999);
     }
 
     /**
      * Filter show_advanced_plugins to display the autoloaded plugins.
-     * @param $bool bool Whether to show the advanced plugins for the specified plugin type.
+     * @param $show bool Whether to show the advanced plugins for the specified plugin type.
      * @param $type string The plugin type, i.e., `mustuse` or `dropins`
      * @return bool We return `false` to prevent WordPress from overriding our work
      * {@internal We add the plugin details ourselves, so we return false to disable the filter.}
@@ -138,18 +142,18 @@ class Autoloader
         $screen = get_current_screen();
         $current = is_multisite() ? 'plugins-network' : 'plugins';
 
-        if ($screen->{'base'} != $current || $type != 'mustuse' || !current_user_can('activate_plugins')) {
+        if ($screen->base !== $current || $type !== 'mustuse' || !current_user_can('activate_plugins')) {
             return $show;
         }
 
         $this->updateCache();
 
-        self::$auto_plugins = array_map(function ($auto_plugin) {
+        $this->autoPlugins = array_map(function ($auto_plugin) {
             $auto_plugin['Name'] .= ' *';
             return $auto_plugin;
-        }, self::$auto_plugins);
+        }, $this->autoPlugins);
 
-        $GLOBALS['plugins']['mustuse'] = array_unique(array_merge(self::$auto_plugins, self::$mu_plugins), SORT_REGULAR);
+        $GLOBALS['plugins']['mustuse'] = array_unique(array_merge($this->autoPlugins, $this->muPlugins), SORT_REGULAR);
 
         return false;
     }
@@ -161,12 +165,12 @@ class Autoloader
     {
         $cache = get_site_option('bedrock_autoloader');
 
-        if ($cache === false) {
+        if ($cache === false || (isset($cache['plugins'], $cache['count']) && count($cache['plugins']) !== $cache['count'])) {
             $this->updateCache();
             return;
         }
 
-        self::$cache = $cache;
+        $this->cache = $cache;
     }
 
     /**
@@ -176,16 +180,16 @@ class Autoloader
      */
     private function updateCache()
     {
-        require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-        self::$auto_plugins = get_plugins(self::$relative_path);
-        self::$mu_plugins   = get_mu_plugins();
-        $plugins            = array_diff_key(self::$auto_plugins, self::$mu_plugins);
-        $rebuild            = !isset(self::$cache['plugins']) || !is_array(self::$cache['plugins']);
-        self::$activated    = ($rebuild) ? $plugins : array_diff_key($plugins, self::$cache['plugins']);
-        self::$cache        = array('plugins' => $plugins, 'count' => $this->countPlugins());
+        $this->autoPlugins = get_plugins($this->relativePath);
+        $this->muPlugins   = get_mu_plugins();
+        $plugins           = array_diff_key($this->autoPlugins, $this->muPlugins);
+        $rebuild           = !isset($this->cache['plugins']);
+        $this->activated   = $rebuild ? $plugins : array_diff_key($plugins, $this->cache['plugins']);
+        $this->cache       = ['plugins' => $plugins, 'count' => $this->countPlugins()];
 
-        update_site_option('bedrock_autoloader', self::$cache);
+        update_site_option('bedrock_autoloader', $this->cache);
     }
 
     /**
@@ -193,13 +197,13 @@ class Autoloader
      * loaded as usual. Plugins are removed by deletion, so there's no way
      * to deactivate or uninstall.
      */
-    private function pluginHooks()
+    public function pluginHooks()
     {
-        if (!is_array(self::$activated)) {
+        if (!is_array($this->activated)) {
             return;
         }
 
-        foreach (self::$activated as $plugin_file => $plugin_info) {
+        foreach ($this->activated as $plugin_file => $plugin_info) {
             do_action('activate_' . $plugin_file);
         }
     }
@@ -209,7 +213,7 @@ class Autoloader
      */
     private function validatePlugins()
     {
-        foreach (self::$cache['plugins'] as $plugin_file => $plugin_info) {
+        foreach ($this->cache['plugins'] as $plugin_file => $plugin_info) {
             if (!file_exists(WPMU_PLUGIN_DIR . '/' . $plugin_file)) {
                 $this->updateCache();
                 break;
@@ -227,19 +231,21 @@ class Autoloader
      */
     private function countPlugins()
     {
-        if (isset(self::$count)) {
-            return self::$count;
+        if (isset($this->count)) {
+            return $this->count;
         }
 
         $count = count(glob(WPMU_PLUGIN_DIR . '/*/', GLOB_ONLYDIR | GLOB_NOSORT));
 
-        if (!isset(self::$cache['count']) || $count != self::$cache['count']) {
-            self::$count = $count;
+        if (!isset($this->cache['count']) || $count !== $this->cache['count']) {
+            $this->count = $count;
             $this->updateCache();
         }
 
-        return self::$count;
+        return $this->count;
     }
 }
 
-new Autoloader();
+if (is_blog_installed() && class_exists(Autoloader::class)) {
+    new Autoloader();
+}
