@@ -5,8 +5,6 @@ namespace LevelLevel;
 use PHPUnit\Framework\TestCase;
 use Roots\Bedrock\Autoloader;
 
-use function Roots\Bedrock\determine_autoload_dir;
-
 /**
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
