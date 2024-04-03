@@ -66,7 +66,7 @@ class Autoloader
      * Custom function by Level Level.
      * This function returns the directory where the composer.json file is located.
      */
-    private function llDetermineAutoloadeDir(): string {
+    public function llDetermineAutoloadeDir(): string {
         if (defined('LL_AUTOLOAD_DIR')) {
             return constant('LL_AUTOLOAD_DIR');
         }
