@@ -97,7 +97,7 @@ class Autoloader
      * Finally it loads the post-autoload file.
      */
     private function llAutoload(): void {
-        $autoload_dir = $this->llDetermineAutoloadeDir();
+        $autoload_dir = $this->llDetermineAutoloadDir();
         if (file_exists( $autoload_dir . '/pre-autoload.php')) {
             require_once( $autoload_dir . '/pre-autoload.php');
         }
