@@ -169,7 +169,7 @@ class Autoloader
             return $this->llForcedPluginsConfig;
         }
 
-        $json_file = $this->llDetermineAutoloadeDir() . '/ll-forced-plugins.json';
+        $json_file = $this->llDetermineAutoloadDir() . '/ll-forced-plugins.json';
         if (!file_exists($json_file)) {
             $this->llForcedPluginsConfig = null;
             return $this->llForcedPluginsConfig;
