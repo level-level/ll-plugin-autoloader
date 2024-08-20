@@ -141,6 +141,10 @@ class Autoloader
         add_action( 'load-plugins.php', array( $this, 'llAddPluginActionLinkFilters' ), 1 );
     }
 
+    /**
+     * Adds filters to the plugin action links to remove the deactivate link
+     * for forced plugins.
+     */
     public function llAddPluginActionLinkFilters(): void {
         $parsed_forced_plugins_config = $this->llGetForcedPluginsConfig();
         $forced_plugins = $parsed_forced_plugins_config['forced_plugins'] ?? array();
@@ -150,6 +154,18 @@ class Autoloader
         }
     }
 
+    /**
+     * Removes the deactivate link for forced plugins.
+     */
+    public function llFilterPluginActionLinksDeactivate( array $actions ): array {
+        unset( $actions['deactivate'] );
+        $actions['ll_autoload_force_activated'] = 'Force activated by LL Autoloader';
+        return $actions;
+    }
+
+    /**
+     * Activate the provided forced plugin.
+     */
     private function llLoadForcedPlugin( string $slug, bool $network ): bool {
         $wp_plugins = get_plugins();
         if (! isset($wp_plugins[$slug])) {
@@ -164,6 +180,9 @@ class Autoloader
         return ! is_wp_error($activation_result);
     }
 
+    /**
+     * Get the forced plugins configuration from the configuration file or cache.
+     */
     private function llGetForcedPluginsConfig(): ?array {
         if ( ! is_null( $this->llForcedPluginsConfig ) ) {
             return $this->llForcedPluginsConfig;
@@ -183,12 +202,6 @@ class Autoloader
         }
         $this->llForcedPluginsConfig = $parsed_json;
         return $this->llForcedPluginsConfig;
-    }
-
-    public function llFilterPluginActionLinksDeactivate( array $actions ): array {
-        unset( $actions['deactivate'] );
-        $actions['ll_autoload_force_activated'] = 'Force activated by LL Autoloader';
-        return $actions;
     }
 
 
