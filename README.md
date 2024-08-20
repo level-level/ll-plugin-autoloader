@@ -76,7 +76,7 @@ Inside, paste the following content.
 			"slug": "first-plugin/first-plugin.php",
 			"network": false
 		},
-        {
+		{
 			"slug": "second-plugin/second-plugin.php",
 			"network": true
 		}
