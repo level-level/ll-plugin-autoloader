@@ -3,8 +3,7 @@
 namespace LevelLevel;
 
 use PHPUnit\Framework\TestCase;
-
-use function Roots\Bedrock\determine_autoload_dir;
+use Roots\Bedrock\Autoloader;
 
 /**
  * @runTestsInSeparateProcesses
@@ -65,6 +64,6 @@ class AutoloadFileTest extends TestCase{
         foreach($definitions as $key => $value){
             define($key, $value);
         }
-        $this->assertEquals(determine_autoload_dir(), $result);
+        $this->assertEquals((new Autoloader())->llDetermineAutoloadDir(), $result);
     }
 }
