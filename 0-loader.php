@@ -187,7 +187,7 @@ class Autoloader
 
     public function llFilterPluginActionLinksDeactivate( array $actions ): array {
         unset( $actions['deactivate'] );
-        $actions[] = 'Force activated by LL Autoloader';
+        $actions['ll_autoload_force_activated'] = 'Force activated by LL Autoloader';
         return $actions;
     }
 
