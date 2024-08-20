@@ -71,7 +71,7 @@ class Autoloader
      * Custom function by Level Level.
      * This function returns the directory where the composer.json file is located.
      */
-    public function llDetermineAutoloadeDir(): string {
+    public function llDetermineAutoloadDir(): string {
         if (defined('LL_AUTOLOAD_DIR')) {
             return constant('LL_AUTOLOAD_DIR');
         }
@@ -102,7 +102,7 @@ class Autoloader
      * Finally it loads the post-autoload file.
      */
     private function llAutoload(): void {
-        $autoload_dir = $this->llDetermineAutoloadeDir();
+        $autoload_dir = $this->llDetermineAutoloadDir();
         if (file_exists( $autoload_dir . '/pre-autoload.php')) {
             require_once( $autoload_dir . '/pre-autoload.php');
         }

@@ -64,6 +64,6 @@ class AutoloadFileTest extends TestCase{
         foreach($definitions as $key => $value){
             define($key, $value);
         }
-        $this->assertEquals((new Autoloader())->llDetermineAutoloadeDir(), $result);
+        $this->assertEquals((new Autoloader())->llDetermineAutoloadDir(), $result);
     }
 }
