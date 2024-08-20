@@ -41,8 +41,8 @@ class Autoloader
     /** @var string Relative path to the mu-plugins dir */
     private $relativePath;
 
-	/** @var array|null Configuration for force loaded plugins */
-	private $llForcedPluginsConfig;
+    /** @var array|null Configuration for force loaded plugins */
+    private $llForcedPluginsConfig;
 
     /**
      * Create singleton, populate vars, and set WordPress hooks
@@ -62,7 +62,7 @@ class Autoloader
         }
 
         $this->llAutoload(); // Call the custom autoloading for Level Level
-		$this->llForcedPluginsHooks(); // Call the hooks needed for forced plugins loading for Level Level
+        $this->llForcedPluginsHooks(); // Call the hooks needed for forced plugins loading for Level Level
 
         $this->loadPlugins();
     }
@@ -119,75 +119,77 @@ class Autoloader
         }
     }
 
-	public function llLoadForcedPlugins(): void {
-		$parsed_forced_plugins_config = $this->llGetForcedPluginsConfig();
-		if ( empty( $parsed_forced_plugins_config['forced_plugins'] ) ) {
-			return;
-		}
+    public function llLoadForcedPlugins(): void {
+        $parsed_forced_plugins_config = $this->llGetForcedPluginsConfig();
+        if ( empty( $parsed_forced_plugins_config['forced_plugins'] ) ) {
+            return;
+        }
 
-		foreach ($parsed_forced_plugins_config['forced_plugins'] as $plugin) {
-			if ( ! isset( $plugin['slug'] ) ) {
-				continue;
-			}
+        foreach ($parsed_forced_plugins_config['forced_plugins'] as $plugin) {
+            if ( ! isset( $plugin['slug'] ) ) {
+                continue;
+            }
 
-			$network = is_multisite() && ( $plugin['network'] ?? false );
-			$this->llLoadForcedPlugin( $plugin['slug'], $network );
-		}
-	}
+            $network = is_multisite() && ( $plugin['network'] ?? false );
+            $this->llLoadForcedPlugin( $plugin['slug'], $network );
+        }
+    }
 
-	private function llForcedPluginsHooks(): void {
-		add_action('admin_init', array( $this, 'llLoadForcedPlugins' ));
+    private function llForcedPluginsHooks(): void {
+        add_action('admin_init', array( $this, 'llLoadForcedPlugins' ));
 
-		add_action( 'load-plugins.php', function(): void {
-			$parsed_forced_plugins_config = $this->llGetForcedPluginsConfig();
-			$forced_plugins = $parsed_forced_plugins_config['forced_plugins'] ?? array();
-			foreach ($forced_plugins as $forced_plugin) {
-				add_filter( 'plugin_action_links_' . $forced_plugin['slug'], array( $this, 'llFilterPluginActionLinksDeactivate' ) );
-				add_filter( 'network_admin_plugin_action_links_' . $forced_plugin['slug'], array( $this, 'llFilterPluginActionLinksDeactivate' ) );
-			}
-		}, 1 );
-	}
+        add_action( 'load-plugins.php', array( $this, 'llAddPluginActionLinkFilters' ), 1 );
+    }
 
-	private function llLoadForcedPlugin( string $slug, bool $network ): bool {
-		$wp_plugins = get_plugins();
-		if (! isset($wp_plugins[$slug])) {
-			return false;
-		}
+    public function llAddPluginActionLinkFilters(): void {
+        $parsed_forced_plugins_config = $this->llGetForcedPluginsConfig();
+        $forced_plugins = $parsed_forced_plugins_config['forced_plugins'] ?? array();
+        foreach ($forced_plugins as $forced_plugin) {
+            add_filter( 'plugin_action_links_' . $forced_plugin['slug'], array( $this, 'llFilterPluginActionLinksDeactivate' ) );
+            add_filter( 'network_admin_plugin_action_links_' . $forced_plugin['slug'], array( $this, 'llFilterPluginActionLinksDeactivate' ) );
+        }
+    }
 
-		if ((! $network && is_plugin_active($slug)) || is_plugin_active_for_network($slug)) {
-			return false;
-		}
+    private function llLoadForcedPlugin( string $slug, bool $network ): bool {
+        $wp_plugins = get_plugins();
+        if (! isset($wp_plugins[$slug])) {
+            return false;
+        }
 
-		$activation_result = $network ? activate_plugin($slug, '', true) : activate_plugin($slug);
-		return ! is_wp_error($activation_result);
-	}
+        if ((! $network && is_plugin_active($slug)) || is_plugin_active_for_network($slug)) {
+            return false;
+        }
 
-	private function llGetForcedPluginsConfig(): ?array {
-		if ( ! is_null( $this->llForcedPluginsConfig ) ) {
-			return $this->llForcedPluginsConfig;
-		}
+        $activation_result = $network ? activate_plugin($slug, '', true) : activate_plugin($slug);
+        return ! is_wp_error($activation_result);
+    }
 
-		$json_file = $this->llDetermineAutoloadeDir() . '/ll-forced-plugins.json';
-		if (!file_exists($json_file)) {
-			$this->llForcedPluginsConfig = null;
-			return $this->llForcedPluginsConfig;
-		}
+    private function llGetForcedPluginsConfig(): ?array {
+        if ( ! is_null( $this->llForcedPluginsConfig ) ) {
+            return $this->llForcedPluginsConfig;
+        }
 
-		$json = file_get_contents($json_file) ?: '';
-		$parsed_json = json_decode($json, true);
-		if ( ! is_array( $parsed_json ) ) {
-			$this->llForcedPluginsConfig = null;
-			return $this->llForcedPluginsConfig;
-		}
-		$this->llForcedPluginsConfig = $parsed_json;
-		return $this->llForcedPluginsConfig;
-	}
+        $json_file = $this->llDetermineAutoloadeDir() . '/ll-forced-plugins.json';
+        if (!file_exists($json_file)) {
+            $this->llForcedPluginsConfig = null;
+            return $this->llForcedPluginsConfig;
+        }
 
-	public function llFilterPluginActionLinksDeactivate( array $actions ): array {
-		unset( $actions['deactivate'] );
-		$actions[] = 'Force activated by LL Autoloader';
-		return $actions;
-	}
+        $json = file_get_contents($json_file) ?: '';
+        $parsed_json = json_decode($json, true);
+        if ( ! is_array( $parsed_json ) ) {
+            $this->llForcedPluginsConfig = null;
+            return $this->llForcedPluginsConfig;
+        }
+        $this->llForcedPluginsConfig = $parsed_json;
+        return $this->llForcedPluginsConfig;
+    }
+
+    public function llFilterPluginActionLinksDeactivate( array $actions ): array {
+        unset( $actions['deactivate'] );
+        $actions[] = 'Force activated by LL Autoloader';
+        return $actions;
+    }
 
 
    /**
