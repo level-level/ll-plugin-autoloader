@@ -62,5 +62,33 @@ This file can be used to bootstrap/configure mu-plugin loaded dependencies, or t
 
 Adding logging is an example of this. You probably require the Monolog composer dependency, but want it to be bootstrapped before we load the mu-plugins.
 
+## Force load normal plugins
+In some cases, loading a plugin as must-use plugin can cause issues with the plugin.
+Instead, you have the option to force load plugins like normal plugins.
+
+In the path where also your vendor folder is, create a file called `ll-forced-plugins.json`.
+Inside, paste the following content.
+
+```json
+{
+	"forced_plugins": [
+		{
+			"slug": "first-plugin/first-plugin.php",
+			"network": false
+		},
+		{
+			"slug": "second-plugin/second-plugin.php",
+			"network": true
+		}
+	]
+}
+```
+
+The slug references the plugin file to load.
+Network determines if a plugin should be network activated if it's a multisite installation.
+
+Please note these force activated plugins will only be activated when visiting the WP-admin.
+This is needed because some plugins want to perform actions like redirects directly after activation.
+
 ## Upgrading from v2.x to v3.x
 In v3, the `wp-content` directory loads by default, instead of the template directory in v2. To restore behaviour, set `define( 'LL_AUTOLOAD_USE_PARENT', true );` in `wp-config.php`.
